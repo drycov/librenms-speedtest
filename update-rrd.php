@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+
 <?php
 
 $log = file_get_contents(__DIR__ . '/../logs/speedtest.log');
