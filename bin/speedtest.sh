@@ -1,8 +1,8 @@
 #!/bin/bash
 
-LOG_DIR="plugins/Speedtest/logs"
+LOG_DIR="../logs"
 LOG_FILE="${LOG_DIR}/speedtest.log"
-SERVER_FILE="plugins/Speedtest/tmp/speedtest-server"
+SERVER_FILE="../tmp/speedtest-server"
 
 mkdir -p "$LOG_DIR"
 mkdir -p "$(dirname "$SERVER_FILE")"
