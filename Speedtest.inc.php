@@ -17,6 +17,10 @@
             margin-bottom: 20px;
         }
     </style>
+        <!-- Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
 </head>
 
 <body>
@@ -87,10 +91,7 @@
 <div id="live-result" class="well well-sm" style="display:none; font-family: monospace;"></div>
 
 
-    <!-- Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
+
 
     <script>
     // Tippy.js: тултипы
