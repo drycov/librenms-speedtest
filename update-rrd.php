@@ -2,16 +2,18 @@
 <?php
 
 $logFile = __DIR__ . '/../logs/speedtest.log';
-$log = file_exists($logFile) ? file_get_contents($logFile) : null;
-$data = json_decode($log, true);
+$dataRaw = file_exists($logFile) ? file_get_contents($logFile) : null;
+$data = json_decode($dataRaw, true);
 
 if (!$data || !isset($data['upload'], $data['download'], $data['ping'])) {
+    error_log("[" . date('c') . "] ERROR: Invalid speedtest.log\n", 3, $logFile);
     exit("Invalid speedtest.log\n");
 }
 
-$upload = round($data['upload']['bandwidth'] * 8 / 1000 / 1000, 2);   // Mbps
-$download = round($data['download']['bandwidth'] * 8 / 1000 / 1000, 2); // Mbps
-$ping = $data['ping']['latency'];                                      // ms
+// Конвертация в Mbps
+$upload = round($data['upload']['bandwidth'] * 8 / 1000 / 1000, 2);
+$download = round($data['download']['bandwidth'] * 8 / 1000 / 1000, 2);
+$ping = round($data['ping']['latency'], 2);
 
 $rrdDir = __DIR__ . '/rrd';
 $pngDir = __DIR__ . '/png';
@@ -22,7 +24,7 @@ $pngDir = __DIR__ . '/png';
 $rrdBandwidth = "$rrdDir/speedtest-bandwidth.rrd";
 $rrdLatency = "$rrdDir/speedtest-latency.rrd";
 
-// 1. Создание RRD-файлов
+// === Создание RRD-файлов при отсутствии ===
 if (!file_exists($rrdBandwidth)) {
     exec("rrdtool create $rrdBandwidth --step 300 \
         DS:upload:GAUGE:600:0:1000 \
@@ -42,11 +44,21 @@ if (!file_exists($rrdLatency)) {
         RRA:AVERAGE:0.5:288:365");
 }
 
-// 2. Обновление значений
-exec("rrdtool update $rrdBandwidth N:$upload:$download");
-exec("rrdtool update $rrdLatency N:$ping");
+// === Обновление значений RRD ===
+$rc = 0;
+$out = [];
 
-// 3. Генерация PNG-графиков
+exec("rrdtool update $rrdBandwidth N:$upload:$download 2>&1", $out, $rc);
+if ($rc !== 0) {
+    error_log("[" . date('c') . "] ERROR bandwidth update: " . implode("\n", $out) . "\n", 3, $logFile);
+}
+
+exec("rrdtool update $rrdLatency N:$ping 2>&1", $out, $rc);
+if ($rc !== 0) {
+    error_log("[" . date('c') . "] ERROR latency update: " . implode("\n", $out) . "\n", 3, $logFile);
+}
+
+// === Генерация PNG-графиков ===
 $periods = [
     'day'   => 86400,
     'week'  => 604800,
@@ -58,7 +70,6 @@ foreach ($periods as $label => $seconds) {
     $bandwidthPng = "$pngDir/speedtest-bandwidth-$label.png";
     $latencyPng   = "$pngDir/speedtest-latency-$label.png";
 
-    // Bandwidth graph
     exec("rrdtool graph $bandwidthPng --start -$seconds --width 600 --height 200 \
         --title 'Bandwidth ($label)' \
         DEF:up=$rrdBandwidth:upload:AVERAGE \
@@ -69,7 +80,6 @@ foreach ($periods as $label => $seconds) {
         GPRINT:up:LAST:'Current Up\\: %5.2lf Mbps' \
         GPRINT:down:LAST:'Current Down\\: %5.2lf Mbps\\n'");
 
-    // Latency graph
     exec("rrdtool graph $latencyPng --start -$seconds --width 600 --height 200 \
         --title 'Latency ($label)' \
         DEF:ping=$rrdLatency:latency:AVERAGE \

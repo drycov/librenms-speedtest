@@ -53,7 +53,7 @@
                     <?php
                     $types = ['day', 'week', 'month', 'year'];
                     foreach ($types as $type) {
-                        echo "<div class='col-md-3 text-center'>
+                        echo "<div class='col-md-3'>
                             <img src='plugins/Speedtest/png/speedtest-bandwidth-$type.png' class='img-graph' data-tippy-content='<img src=\"plugins/Speedtest/png/speedtest-bandwidth-$type.png\" style=\"max-width: 300px;\">'>
                         </div>";
                     }
@@ -68,7 +68,7 @@
                 <div class="panel-body row">
                     <?php
                     foreach ($types as $type) {
-                        echo "<div class='col-md-3 text-center'>
+                        echo "<div class='col-md-3'>
                             <img src='plugins/Speedtest/png/speedtest-latency-$type.png' class='img-graph' data-tippy-content='<img src=\"plugins/Speedtest/png/speedtest-latency-$type.png\" style=\"max-width: 300px;\">'>
                         </div>";
                     }
@@ -82,7 +82,6 @@
     <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Running Speedtest...</span>
     </div>
-    <p>Running Speedtest... Please wait</p>
 </div>
 
 <div id="live-result" class="well well-sm" style="display:none; font-family: monospace;"></div>
